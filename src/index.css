@@ -15,9 +15,10 @@ body {
   margin: 30px auto;
   overflow: auto;
   min-height: 300px;
-  border: 1px solid steelblue;
+  border: 2px solid gray;
   padding: 30px;
-  border-radius: 5px;
+  /* box-shadow: 1px 1px #888888; */
+  border-radius: 10px;
 }
 
 .header {
@@ -73,6 +74,10 @@ body {
 
 .add-form {
   margin-bottom: 40px;
+  background-color: rgb(244, 244, 244);
+  border: 1px solid rgb(230, 226, 226);
+  border-radius: 10px;
+  padding: 20px;
 }
 
 .form-control {

@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from "react";
 
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Task from "./components/Task";
 import Tasks from "./components/Tasks";
 import AddTask from "./components/AddTask";
-import Footer from "./components/Footer";
 
 function App() {
   const [isAddClicked, setisAddClicked] = useState(false);
+  const [isEditClicked, setisEditClicked] = useState(false);
   const [tasks, setTasks] = useState([]);
-
+  const [currentTask, setCurrentTask] = useState({});
   useEffect(() => {
-    console.log("useEffect called");
     const getTasks = async () => {
       const tasksFromServer = await fetchTasks();
       setTasks(tasksFromServer);
     };
-    // return () => {
-    //   cleanup
-    // };
+
     getTasks();
   }, []);
 
@@ -26,7 +24,6 @@ function App() {
   const fetchTasks = async () => {
     const res = await fetch("http://localhost:5000/tasks");
     const data = await res.json();
-    console.log(data);
     return data;
   };
 
@@ -34,7 +31,6 @@ function App() {
   const fetchTask = async (id) => {
     const res = await fetch(`http://localhost:5000/tasks/${id}`);
     const data = await res.json();
-    // console.log(data);
     return data;
   };
 
@@ -47,12 +43,28 @@ function App() {
     alert("Task deleted");
   };
 
+  //edit task
+  const editTask = async (updatedTask) => {
+    setisEditClicked(true);
+    setisAddClicked(false);
+    setTasks(
+      tasks.map((task) =>
+        task.id === updatedTask.id ? { ...updatedTask } : task
+      )
+    );
+  };
+
+  const editClicked = (task) => {
+    console.log("editClicked called", task);
+    setisEditClicked(true);
+
+    // setCurrentTask(task);
+  };
+
   //toggle reminder
   const toggleReminder = async (id) => {
     const myTask = await fetchTask(id);
-    console.log("myTask", myTask);
     const updatedTask = { ...myTask, reminder: !myTask.reminder };
-    console.log("updatedTask", updatedTask);
     const res = await fetch(`http://localhost:5000/tasks/${id}`, {
       method: "PUT",
       headers: {
@@ -61,7 +73,6 @@ function App() {
       body: JSON.stringify(updatedTask),
     });
     const data = await res.json();
-    console.log("data", data);
 
     setTasks(
       tasks.map((task) =>
@@ -85,26 +96,70 @@ function App() {
     // setTasks([...tasks, newTask]);
     alert("New task added");
   };
-
   return (
-    <div className="container">
-      <Header
-        title="Task Tracker"
-        addClick={() => setisAddClicked(!isAddClicked)}
-        isAddClicked={isAddClicked}
-      />
-      {isAddClicked && <AddTask addTask={addTask} />}
+    <Router>
+      <div className="container">
+        <Route
+          path="/"
+          render={() => (
+            <Header
+              title="Task Tracker"
+              addClick={() => {
+                console.log("addClick");
+                console.log("before isAddClicked", isAddClicked);
 
-      {tasks.length ? (
-        <Tasks
-          tasks={tasks}
-          deleteTask={deleteTask}
-          toggleReminder={toggleReminder}
+                setisAddClicked(!isAddClicked);
+                setisEditClicked(false);
+                console.log("after isAddClicked", isAddClicked);
+              }}
+              closeClick={() => {
+                setisAddClicked(false);
+              }}
+              isAddClicked={isAddClicked}
+            />
+          )}
         />
-      ) : (
-        <h3>No Tasks available</h3>
-      )}
-    </div>
+        <Route
+          path="/add"
+          exact
+          render={() => (
+            <>
+              {isAddClicked && (
+                <AddTask addTask={addTask} fetchTask={fetchTask} />
+              )}
+            </>
+          )}
+        />
+        <Route
+          path="/edit/:id"
+          exact
+          render={() => (
+            <>
+              {isEditClicked && (
+                <AddTask
+                  editTask={editTask}
+                  fetchTask={fetchTask}
+                  // currentTask={currentTask}
+                />
+              )}
+            </>
+          )}
+        />
+        <>
+          {tasks.length ? (
+            <Tasks
+              tasks={tasks}
+              deleteTask={deleteTask}
+              editTask={editTask}
+              editClicked={editClicked}
+              toggleReminder={toggleReminder}
+            />
+          ) : (
+            <h3>No Tasks available</h3>
+          )}
+        </>
+      </div>
+    </Router>
   );
 }
 

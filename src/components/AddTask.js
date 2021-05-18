@@ -1,10 +1,43 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useParams, useHistory } from "react-router-dom";
+import _ from "lodash";
 
-const AddTask = ({ addTask }) => {
+const AddTask = ({ addTask, editTask, fetchTask }) => {
+  const { id } = useParams();
+  const isAddMode = !id;
+
   const [text, setText] = useState("");
   const [day, setDay] = useState("");
   const [reminder, setReminder] = useState(false);
+  let history = useHistory();
+
+  let demo = useRef(id);
+
+  useEffect(() => {
+    if (!isAddMode) {
+      // get user and set form fields
+      fetchTask(id).then((task) => {
+        // console.log("fetch task ", task);
+        demo.current = id;
+        setText(task.text);
+        setDay(task.day);
+        setReminder(task.reminder);
+      });
+    }
+  }, []);
+  console.log("demo.current", demo.current);
+  console.log("id", id);
+  if (!isAddMode && Number(demo.current) != id) {
+    fetchTask(id).then((task) => {
+      // console.log("inside if fetch task", task);
+      demo.current = id;
+      setText(task.text);
+      setDay(task.day);
+      setReminder(task.reminder);
+    });
+  }
+
   return (
     <form
       className="add-form"
@@ -14,7 +47,24 @@ const AddTask = ({ addTask }) => {
           alert("Please enter some task");
           return;
         }
-        addTask({ text, day, reminder });
+        if (isAddMode) {
+          addTask({ text, day, reminder });
+          history.push("/");
+        } else {
+          (async () => {
+            const updatedTask = { ...{ text, day, reminder } };
+            const res = await fetch(`http://localhost:5000/tasks/${id}`, {
+              method: "PUT",
+              headers: {
+                "Content-type": "application/json",
+              },
+              body: JSON.stringify(updatedTask),
+            });
+            const data = await res.json();
+            editTask(data);
+            history.push("/");
+          })();
+        }
         setText("");
         setDay("");
         setReminder(false);
@@ -53,7 +103,7 @@ const AddTask = ({ addTask }) => {
 };
 
 AddTask.propTypes = {
-  addTask: PropTypes.func.isRequired,
+  addTask: PropTypes.func,
 };
 
 export default AddTask;

@@ -1,6 +1,9 @@
 import PropTypes from "prop-types";
 import { FaTimes } from "react-icons/fa";
-const Task = ({ task, deleteTask, toggleReminder }) => {
+import { FaEdit } from "react-icons/fa";
+import { Link } from "react-router-dom";
+
+const Task = ({ task, deleteTask, editTask, editClicked, toggleReminder }) => {
   return (
     <div
       className={`task ${task.reminder ? "reminder" : ""}`}
@@ -12,6 +15,21 @@ const Task = ({ task, deleteTask, toggleReminder }) => {
           style={{ color: "red", cursor: "pointer" }}
           onClick={() => deleteTask(task.id)}
         />
+      </h3>
+      <h3 style={{ float: "right", marginTop: "2px" }}>
+        {" "}
+        <Link to={{ pathname: `/edit/${task.id}` }}>
+          <FaEdit
+            style={{ cursor: "pointer", color: "gray" }}
+            onClick={() => {
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              });
+              editClicked(task);
+            }}
+          />
+        </Link>
       </h3>
       <p>{task.day}</p>
     </div>
