@@ -7,7 +7,6 @@ const Header = ({ title, addClick, closeClick, isAddClicked }) => {
   const { pathname } = useLocation();
   let showClose = pathname.includes("/edit", 0) ? true : false;
   let history = useHistory();
-  console.log("isAddClickedisAddClicked", isAddClicked);
   return (
     <header className="header">
       <Link to="/" style={{ textDecoration: "none", color: "black" }}>

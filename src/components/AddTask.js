@@ -18,7 +18,6 @@ const AddTask = ({ addTask, editTask, fetchTask }) => {
     if (!isAddMode) {
       // get user and set form fields
       fetchTask(id).then((task) => {
-        // console.log("fetch task ", task);
         demo.current = id;
         setText(task.text);
         setDay(task.day);
@@ -26,11 +25,8 @@ const AddTask = ({ addTask, editTask, fetchTask }) => {
       });
     }
   }, []);
-  console.log("demo.current", demo.current);
-  console.log("id", id);
   if (!isAddMode && Number(demo.current) != id) {
     fetchTask(id).then((task) => {
-      // console.log("inside if fetch task", task);
       demo.current = id;
       setText(task.text);
       setDay(task.day);
@@ -49,7 +45,6 @@ const AddTask = ({ addTask, editTask, fetchTask }) => {
         }
         if (isAddMode) {
           addTask({ text, day, reminder });
-          history.push("/");
         } else {
           (async () => {
             const updatedTask = { ...{ text, day, reminder } };
